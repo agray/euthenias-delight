@@ -6,6 +6,7 @@ An invoice generator
 Accepts an XML file from a client who specify the job that needs to be invoiced.
 The XML file is of the form:
 
+<PRE>
 <invoice>
   <to>
     <customer>
@@ -54,3 +55,4 @@ The XML file is of the form:
     <salutation></salutation>
   </emailBody>
  </invoice>
+ </PRE>
