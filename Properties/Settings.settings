@@ -1,0 +1,21 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="euthenias_delight.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="SMTPServer" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">smtp.gmail.com</Value>
+    </Setting>
+    <Setting Name="NextJobNumber" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1113</Value>
+    </Setting>
+    <Setting Name="NextInvoiceNumber" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1003</Value>
+    </Setting>
+    <Setting Name="SMTPUsername" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">=0TPRB1dJpWWxZleRlmQuJFWK1mYDRnMZJTNw0ka41GV5tmRhNHaWdleZFjUrh2RahkTH1EeJpXW</Value>
+    </Setting>
+    <Setting Name="SMTPPassword" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">90TUQJVMtl1baBTVKhGWSVlVHF2SOpWV</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
