@@ -23,6 +23,7 @@ The XML file is of the form:
 		</customer>
 	  </to>
 	  <items>
+		<!--As many item elements as you need-->
 		<item>
 		  <itemNumber></itemNumber>
 		  <description></description>
@@ -30,22 +31,13 @@ The XML file is of the form:
 		  <price></price>
 		  <discount></discount>
 		</item>
-		<item>
-		  <itemNumber></itemNumber>
-		  <description></description>
-		  <quantity></quantity>
-		  <price></price>
-		  <discount></discount>
-		</item>
-	  </items>
 	  <terms></terms>
 	  <gst>
 		<collecting></collecting>
 		<percent></percent>
 	  </gst>
 	  <notes>
-		<note></note>
-		<note></note>
+		<!--As many note elements as you need-->
 		<note></note>
 	  </notes>
 	  <emailBody>
