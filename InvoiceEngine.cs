@@ -2,12 +2,13 @@
 using System.Xml;
 using System.Xml.XPath;
 using com.phoenixconsulting.common.mail;
+using euthenias_delight.Properties;
+using euthenias_delight.XML;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Shapes;
 using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.Rendering;
 using PdfSharp.Pdf;
-using euthenias_delight.Properties;
 using MigraDocBorderStyle = MigraDoc.DocumentObjectModel.BorderStyle;
 using MigraDocColor = MigraDoc.DocumentObjectModel.Color;
 using MigraDocImage = MigraDoc.DocumentObjectModel.Shapes.Image;
@@ -16,17 +17,18 @@ namespace euthenias_delight {
     public class InvoiceEngine {
         private Document _document;
         private Table _table;
-        private static XmlDocument _invoice;
-        private readonly XPathNavigator _navigator;
         private TextFrame _addressFrame;
-        private static XPathNavigator _toNavItem;
-        private static XPathNavigator _rootNavItem;
+        
+        public InvoiceEngine(XmlDocument xmlDoc)
+        {
+            XmlDoc.Document = xmlDoc;
+            XmlDoc.Navigator = XmlDoc.Document.CreateNavigator();
+            XmlDoc.RootNavItem = XmlDoc.SelectItem(XmlDoc.ROOT);
+            XmlDoc.ToNavItem = XmlDoc.SelectItem(XmlDoc.INVOICE_TO);
+        }
 
-        public InvoiceEngine(XmlDocument xmlDoc) {
-            _invoice = xmlDoc;
-            _navigator = _invoice.CreateNavigator();
-            _rootNavItem = SelectItem("/");
-            _toNavItem = SelectItem("/invoice/to");
+        public bool ThereAreItemsToInvoice() {
+            return XmlDoc.InvoiceItems.Count < 0;
         }
 
         public bool EmailInvoice() {
@@ -36,7 +38,7 @@ namespace euthenias_delight {
 
         private void EmailInvoice(Document invoice) {
             MemoryStream stream = ConvertToStream(invoice);
-            MailMessageBuilder.SendEmailToClient(GetValue(_toNavItem, "customer/email"), GetBody(), stream);
+            MailMessageBuilder.SendEmailToClient(XmlDoc.CustomerEmail, GetBody(), stream);
         }
 
         private MemoryStream ConvertToStream(Document invoice) {
@@ -48,16 +50,11 @@ namespace euthenias_delight {
         }
 
         private string GetBody() {
-            string greeting = GetValue(_rootNavItem, "/invoice/emailBody/greeting");
-            string nickname = GetValue(_toNavItem, "/customer/nickname");
-            string message = GetValue(_rootNavItem, "/invoice/emailBody/message");
-            string salutation = GetValue(_rootNavItem, "/invoice/emailBody/salutation");
-
-            return greeting + nickname + ", " + 
-                Constants.TWO_LINES + 
-                message + 
-                Constants.TWO_LINES + 
-                salutation;
+            return XmlDoc.EmailBodyGreeting + XmlDoc.CustomerNickname + ", " + 
+                Constants.TWO_LINES +
+                XmlDoc.EmailBodyMessage + 
+                Constants.TWO_LINES +
+                XmlDoc.EmailBodySalutation;
         }
 
         private Document CreatePDFInvoice() {
@@ -196,24 +193,25 @@ namespace euthenias_delight {
         private void FillContent() {
             //Fill address in address text frame
             Paragraph paragraph = _addressFrame.AddParagraph();
-            paragraph.AddText(GetValue(_toNavItem, "/customer/name/singleName"));
+            paragraph.AddText(XmlDoc.CustomerName);
             paragraph.AddLineBreak();
-            paragraph.AddText(GetValue(_toNavItem, "/customer/address/line1"));
+            paragraph.AddText(XmlDoc.CustomerAddressLine1);
             paragraph.AddLineBreak();
-            paragraph.AddText(GetValue(_toNavItem, "/customer/address/city") + " " + GetValue(_toNavItem, "/customer/address/postalCode"));
+            paragraph.AddText(XmlDoc.CustomerAddressCity + " " + XmlDoc.CustomerAddressPostcode);
 
             paragraph = _addressFrame.AddParagraph();
             paragraph.Format.Font.Bold = true;
-            paragraph.AddText("ATTENTION: " + GetValue(_toNavItem, "/customer/attention"));
+            paragraph.AddText("ATTENTION: " + XmlDoc.CustomerAttention);
 
             //Iterate the invoice items
             double totalExtendedPrice = 0;
-            XPathNodeIterator iter = _navigator.Select("/invoice/items/*");
+            XPathNodeIterator iter = XmlDoc.InvoiceItems;
             while(iter.MoveNext()) {
                 XPathNavigator item = iter.Current;
-                double quantity = GetValueAsDouble(item, "quantity");
-                double price = GetValueAsDouble(item, "price");
-                double discount = GetValueAsDouble(item, "discount");
+                
+                double quantity = XmlDoc.ItemQuantity(item);
+                double price = XmlDoc.ItemPrice(item);
+                double discount = XmlDoc.ItemDiscount(item);
 
                 //Each item fills two rows
                 Row row1 = _table.AddRow();
@@ -227,10 +225,10 @@ namespace euthenias_delight {
                 row1.Cells[5].Shading.Color = Constants.TableGray;
                 row1.Cells[5].MergeDown = 1;
 
-                row1.Cells[0].AddParagraph(GetValue(item, "itemNumber"));
+                row1.Cells[0].AddParagraph(XmlDoc.ItemNumber(item));
                 paragraph = row1.Cells[1].AddParagraph();
-                paragraph.AddFormattedText(GetValue(item, "description"), TextFormat.Bold);
-                row2.Cells[1].AddParagraph(GetValue(item, "quantity"));
+                paragraph.AddFormattedText(XmlDoc.ItemDescription(item), TextFormat.Bold);
+                row2.Cells[1].AddParagraph(quantity.ToString());
                 row2.Cells[2].AddParagraph(Constants.DOLLAR_SIGN + price.ToString("0.00"));
                 row2.Cells[3].AddParagraph(discount.ToString("0.0"));
                 row2.Cells[4].AddParagraph();
@@ -300,12 +298,12 @@ namespace euthenias_delight {
             paragraph = _document.LastSection.AddParagraph();
 
             FormatParagraph(paragraph, "1cm", 0.75, 3, Constants.TableBorder, Constants.TableGray);
-            paragraph.AddText("TERMS: " + GetValue(_rootNavItem, "/invoice/terms"));
+            paragraph.AddText("TERMS: " + XmlDoc.InvoiceTerms);
 
             //Add the notes paragraph
             paragraph = _document.LastSection.AddParagraph();
             FormatParagraph(paragraph, "1cm", 0.75, 3, Constants.TableBorder, Constants.TableGray);
-            iter = _navigator.Select("/invoice/notes/*");
+            iter = XmlDoc.InvoiceNotes;
             while(iter.MoveNext()) {
                 string note = iter.Current.InnerXml;
                 paragraph.AddText(note);
@@ -318,14 +316,14 @@ namespace euthenias_delight {
 
         private double GetExtendedPrice(double price) {
             if(WeAreCollectingGST()) {
-                double gstpercent = GetValueAsDouble(_rootNavItem, "invoice/gst/percent");
+                double gstpercent = XmlDoc.GSTPercent;
                 price += gstpercent * price;
             }
             return price;
         }
 
         private bool WeAreCollectingGST() {
-            string areCollecting = GetValue(_rootNavItem, "invoice/gst/collecting");
+            string areCollecting = XmlDoc.GSTCollecting;
             return bool.Parse(areCollecting);
         }
 
@@ -354,25 +352,6 @@ namespace euthenias_delight {
             }
             Settings.Default.Save();
             return sequence;
-        }
-
-        #region XML Accessors
-
-        private string GetValue(XPathNavigator item, string xPath) {
-            XPathNavigator node = item.SelectSingleNode(xPath);
-            return node != null ? node.ToString() : null;
-        }
-
-        private double GetValueAsDouble(XPathNavigator item, string xPath) {
-            return double.Parse(GetValue(item, xPath));
-        }
-
-        private static XPathNavigator SelectItem(string xPath) {
-            XmlDocument subDoc = new XmlDocument();
-            subDoc.LoadXml(_invoice.SelectSingleNode(xPath).InnerXml);
-            return subDoc.CreateNavigator();
-        }
-
-        #endregion
+        }      
     }
 }
