@@ -206,9 +206,10 @@ namespace euthenias_delight {
             //Iterate the invoice items
             double totalExtendedPrice = 0;
             XPathNodeIterator iter = XmlDoc.InvoiceItems;
+
             while(iter.MoveNext()) {
                 XPathNavigator item = iter.Current;
-                
+
                 double quantity = XmlDoc.ItemQuantity(item);
                 double price = XmlDoc.ItemPrice(item);
                 double discount = XmlDoc.ItemDiscount(item);
