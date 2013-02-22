@@ -7,6 +7,7 @@ namespace euthenias_delight {
     public class Constants {
         public const string TWO_LINES = "\n\n";
         public const string DOLLAR_SIGN = "$ ";
+        public const string EURO_SIGN = " €";
         public const string INTERNAL_IMAGES_DIR = @"\Images\";
         public static readonly string PC_IMAGE = ExecutingAssemblyDir + INTERNAL_IMAGES_DIR + @"phoenix.gif";
         public static readonly string INVOICE_PDF_FILENAME = "Phoenix Consulting - Sterling Equity - Invoice - " + FilenameDateStamp + " (No GST).pdf";

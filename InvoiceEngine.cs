@@ -19,8 +19,7 @@ namespace euthenias_delight {
         private Table _table;
         private TextFrame _addressFrame;
         
-        public InvoiceEngine(XmlDocument xmlDoc)
-        {
+        public InvoiceEngine(XmlDocument xmlDoc) {
             XmlDoc.Document = xmlDoc;
             XmlDoc.Navigator = XmlDoc.Document.CreateNavigator();
             XmlDoc.RootNavItem = XmlDoc.SelectItem(XmlDoc.ROOT);
@@ -28,7 +27,7 @@ namespace euthenias_delight {
         }
 
         public bool ThereAreItemsToInvoice() {
-            return XmlDoc.InvoiceItems.Count < 0;
+            return XmlDoc.InvoiceItems.Count > 0;
         }
 
         public bool EmailInvoice() {
@@ -230,14 +229,13 @@ namespace euthenias_delight {
                 paragraph = row1.Cells[1].AddParagraph();
                 paragraph.AddFormattedText(XmlDoc.ItemDescription(item), TextFormat.Bold);
                 row2.Cells[1].AddParagraph(quantity.ToString());
-                row2.Cells[2].AddParagraph(Constants.DOLLAR_SIGN + price.ToString("0.00"));
+                row2.Cells[2].AddParagraph(ToCurrencyString(price));
                 row2.Cells[3].AddParagraph(discount.ToString("0.0"));
                 row2.Cells[4].AddParagraph();
-                row2.Cells[5].AddParagraph(price.ToString("0.00"));
+                row2.Cells[5].AddParagraph(FormatCurrency(price));
                 double extendedPrice = quantity * price;
                 extendedPrice = extendedPrice * (100 - discount) / 100;
-                //row1.Cells[5].AddParagraph(extendedPrice.ToString("0.00") + " €");
-                row1.Cells[5].AddParagraph(Constants.DOLLAR_SIGN + extendedPrice.ToString("0.00"));
+                row1.Cells[5].AddParagraph(ToCurrencyString(extendedPrice));
                 row1.Cells[5].VerticalAlignment = VerticalAlignment.Bottom;
                 totalExtendedPrice += extendedPrice;
 
@@ -248,39 +246,38 @@ namespace euthenias_delight {
             Row row = _table.AddRow();
             row.Borders.Visible = false;
 
-            //Add the total price row
-            //row = _table.AddRow();
-            //row.Cells[0].Borders.Visible = false;
-            //row.Cells[0].AddParagraph("Total Price (Ex GST)");
-            //row.Cells[0].Format.Font.Bold = true;
-            //row.Cells[0].Format.Alignment = ParagraphAlignment.Right;
-            //row.Cells[0].MergeRight = 4;
-            ////row.Cells[5].AddParagraph(totalExtendedPrice.ToString("0.00") + " €");
-            //row.Cells[5].AddParagraph(DOLLAR_SIGN + totalExtendedPrice.ToString("0.00"));
+            if (WeAreCollectingGST()) {
+                //Add the total price row
+                row = _table.AddRow();
+                row.Cells[0].Borders.Visible = false;
+                row.Cells[0].AddParagraph("Amount Due");
+                row.Cells[0].Format.Font.Bold = true;
+                row.Cells[0].Format.Alignment = ParagraphAlignment.Right;
+                row.Cells[0].MergeRight = 4;
+                row.Cells[5].AddParagraph(ToCurrencyString(totalExtendedPrice));
 
-            //Add the VAT row
-            //row = _table.AddRow();
-            //row.Cells[0].Borders.Visible = false;
-            //row.Cells[0].AddParagraph("VAT (19%)");
-            //row.Cells[0].Format.Font.Bold = true;
-            //row.Cells[0].Format.Alignment = ParagraphAlignment.Right;
-            //row.Cells[0].MergeRight = 4;
-            //row.Cells[5].AddParagraph((0.19 * totalExtendedPrice).ToString("0.00") + " €");
-            //row.Cells[5].AddParagraph((0.19 * totalExtendedPrice).ToString("0.00") + " $");
+                //Add the GST row
+                row = _table.AddRow();
+                row.Cells[0].Borders.Visible = false;
+                row.Cells[0].AddParagraph("GST (" + XmlDoc.GSTPercent + "%)");
+                row.Cells[0].Format.Font.Bold = true;
+                row.Cells[0].Format.Alignment = ParagraphAlignment.Right;
+                row.Cells[0].MergeRight = 4;
+                row.Cells[5].AddParagraph(ToCurrencyString(XmlDoc.GSTPercentAsPercentage * totalExtendedPrice));
 
-            //Add the additional fee row
-            //row = _table.AddRow();
-            //row.Cells[0].Borders.Visible = false;
-            //row.Cells[0].AddParagraph("Shipping and Handling");
-            //row.Cells[5].AddParagraph(0.ToString("0.00") + " €");
-            //row.Cells[5].AddParagraph(0.ToString("0.00") + " $");
-            //row.Cells[0].Format.Font.Bold = true;
-            //row.Cells[0].Format.Alignment = ParagraphAlignment.Right;
-            //row.Cells[0].MergeRight = 4;
+                //Add the additional fee row
+                //row = _table.AddRow();
+                //row.Cells[0].Borders.Visible = false;
+                //row.Cells[0].AddParagraph("Shipping and Handling");
+                //row.Cells[5].AddParagraph(ToCurrencyString(0));
+                //row.Cells[0].Format.Font.Bold = true;
+                //row.Cells[0].Format.Alignment = ParagraphAlignment.Right;
+                //row.Cells[0].MergeRight = 4;
+            }
 
             //Add the total due row
             row = _table.AddRow();
-            row.Cells[0].AddParagraph("Total Due (Ex GST)");
+            row.Cells[0].AddParagraph(GetTotalDueLine());
             row.Cells[0].Borders.Visible = false;
             row.Cells[0].Format.Font.Bold = true;
             row.Cells[0].Format.Alignment = ParagraphAlignment.Right;
@@ -288,8 +285,7 @@ namespace euthenias_delight {
 
             totalExtendedPrice = GetExtendedPrice(totalExtendedPrice);
 
-            //row.Cells[5].AddParagraph(totalExtendedPrice.ToString("0.00") + " €");
-            row.Cells[5].AddParagraph(Constants.DOLLAR_SIGN + totalExtendedPrice.ToString("0.00"));
+            row.Cells[5].AddParagraph(ToCurrencyString(totalExtendedPrice));
             row.Cells[5].Format.Font.Bold = true;
 
             //Set the borders of the specified cell range
@@ -315,17 +311,29 @@ namespace euthenias_delight {
             }
         }
 
+        private string ToCurrencyString(double currencyValue) {
+            return XmlDoc.isAUD()
+                       ? Constants.DOLLAR_SIGN + FormatCurrency(currencyValue)
+                       : FormatCurrency(currencyValue) + Constants.EURO_SIGN;
+        }
+
+        private string FormatCurrency(double dollarValue) {
+            return dollarValue.ToString("0.00");
+        }
+
+        private string GetTotalDueLine() {
+            return WeAreCollectingGST() ? "Total Due (Inc GST)" : "Total Due (Ex GST)";
+        }
+
         private double GetExtendedPrice(double price) {
             if(WeAreCollectingGST()) {
-                double gstpercent = XmlDoc.GSTPercent;
-                price += gstpercent * price;
+                price += XmlDoc.GSTPercentAsPercentage * price;
             }
             return price;
         }
 
         private bool WeAreCollectingGST() {
-            string areCollecting = XmlDoc.GSTCollecting;
-            return bool.Parse(areCollecting);
+            return bool.Parse(XmlDoc.GSTCollecting);
         }
 
         private void FormatParagraph(Paragraph p, string spaceBefore, double width, double distance, MigraDocColor borderColor, MigraDocColor shadingColor) {

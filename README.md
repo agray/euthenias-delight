@@ -36,6 +36,7 @@ The XML file is of the form:
 		<collecting></collecting>
 		<percent></percent>
 	  </gst>
+	  <currency></currency>
 	  <notes>
 		<!--As many note elements as you need-->
 		<note></note>

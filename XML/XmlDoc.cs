@@ -30,12 +30,15 @@ namespace euthenias_delight.XML
         public static string ItemNumber(XPathNavigator item) { return GetValue(item, ITEM_NUMBER); }
         public static string ItemDescription(XPathNavigator item) { return GetValue(item, ITEM_DESCRIPTION); }
 
+        public static double GSTPercent { get { return GetValueAsDouble(RootNavItem, GST_PERCENT); } }
+        public static double GSTPercentAsPercentage { get { return GetValueAsDouble(RootNavItem, GST_PERCENT) / 100; } }
+        public static string GSTCollecting { get { return GetValue(RootNavItem, GST_COLLECTING); } }
+
+        public static string Currency { get { return GetValue(RootNavItem, CURRENCY); } }
+
         public static string EmailBodyGreeting { get { return GetValue(RootNavItem, EMAILBODY_GREETING); } }
         public static string EmailBodyMessage { get { return GetValue(RootNavItem, EMAILBODY_MESSAGE); } }
         public static string EmailBodySalutation { get { return GetValue(RootNavItem, EMAILBODY_SALUTATION); } }
-
-        public static double GSTPercent { get { return GetValueAsDouble(RootNavItem, GST_PERCENT); } }
-        public static string GSTCollecting { get { return GetValue(RootNavItem, GST_COLLECTING); } }
 
         #endregion
 
@@ -62,12 +65,16 @@ namespace euthenias_delight.XML
         public const string ITEM_NUMBER = "itemNumber";
         public const string ITEM_DESCRIPTION = "description";
 
+        public const string GST_PERCENT = "invoice/gst/percent";
+        public const string GST_COLLECTING = "invoice/gst/collecting";
+
+        public const string CURRENCY = "invoice/currency";
+
         public const string EMAILBODY_GREETING = "/invoice/emailBody/greeting";
         public const string EMAILBODY_MESSAGE = "/invoice/emailBody/message";
         public const string EMAILBODY_SALUTATION = "/invoice/emailBody/salutation";
 
-        public const string GST_PERCENT = "invoice/gst/percent";
-        public const string GST_COLLECTING = "invoice/gst/collecting";
+        
 
         #endregion
 
@@ -84,10 +91,15 @@ namespace euthenias_delight.XML
 
         public static XPathNavigator SelectItem(string xPath) {
             XmlDocument subDoc = new XmlDocument();
-            subDoc.LoadXml(XmlDoc.Document.SelectSingleNode(xPath).InnerXml);
+            subDoc.LoadXml(Document.SelectSingleNode(xPath).InnerXml);
             return subDoc.CreateNavigator();
         }
 
         #endregion
+
+        public static bool isAUD()
+        {
+            return Currency.Equals("AUD");
+        }
     }
 }
