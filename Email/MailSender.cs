@@ -2,7 +2,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2008-2012, Andrew Gray
+ * Copyright (c) 2008-2013, Andrew Gray
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
