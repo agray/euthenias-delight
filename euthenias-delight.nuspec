@@ -1,0 +1,27 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>euthenias-delight</id>
+    <version>1.0.0.1</version>
+    <title>euthenias-delight</title>
+    <authors>Andrew Gray</authors>
+    <owners>Andrew Gray</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>An invoice generator. Accepts an XML file from a client that specifies the details about the job to be invoiced.</description>
+    <releaseNotes>Initial release</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>Invoice Generator XML</tags>
+    <frameworkAssemblies>
+	  <frameworkAssembly assemblyName="System" targetFramework="net40" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework="net40" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework="net40" />
+    </frameworkAssemblies>
+	<dependencies>
+      <dependency id="PDFsharp-MigraDoc-GDI" version="1.32.3879.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\Release\euthenias-delight.dll" target="lib\net40\" />
+    <file src="README.md" target="lib\net40\" />
+  </files>
+</package>
