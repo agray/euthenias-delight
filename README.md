@@ -1,9 +1,9 @@
 euthenias-delight
 =================
 
-An invoice generator (bonus points if you get the reference in the repository name.)
+	An invoice generator (bonus points if you get the reference in the repository name.)
 
-Accepts an XML file from a client that specifies the details about the job to be invoiced.
+	Accepts an XML file from a client that specifies the details about the job to be invoiced.
 The XML file is of the form:
 
 	<invoice>
