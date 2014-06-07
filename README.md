@@ -1,9 +1,14 @@
-euthenias-delight
-=================
+#euthenias-delight
 
-	An invoice generator (bonus points if you get the reference in the repository name.)
+An invoice generator (bonus points if you get the reference in the repository name.)
 
-	Accepts an XML file from a client that specifies the details about the job to be invoiced.
+Accepts an XML file from a client that specifies the details about the job to be invoiced.
+
+[![Support us][gittip-image]][gittip-url]
+
+## Like what you see?
+[Support us via gittip](https://www.gittip.com/agray/)
+
 The XML file is of the form:
 
 	<invoice>
@@ -99,3 +104,6 @@ Example Data:
 		<salutation>Regards, Me</salutation>
 	  </emailBody>
 	 </invoice>
+
+[gittip-image]: http://img.shields.io/gittip/agray.svg
+[gittip-url]: https://www.gittip.com/agray/
